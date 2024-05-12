@@ -4,7 +4,7 @@ import telegram.ext
 from telegram import ReplyKeyboardMarkup
 from telegram.ext import Application, CommandHandler
 
-with open("token.txt") as f:
+with open("../token/token.txt") as f:
     BOT_TOKEN = f.readline()
 
 timer = 0
