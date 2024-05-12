@@ -1,15 +1,15 @@
-import json
 import logging
 import aiohttp
+import telegram.ext
 from telegram import ReplyKeyboardMarkup
 from telegram.ext import Application, CommandHandler
-import requests
 
-
-with open("/dt/token.txt") as f:
+with open("token.txt") as f:
     BOT_TOKEN = f.readline()
 
-logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.WARNING)
+timer = 0
+
+logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO)
 
 logger = logging.getLogger(__name__)
 
@@ -43,10 +43,6 @@ async def mc_assecories(update, context):
 
 async def offices(update, context):
     geocoder_uri = "http://geocode-maps.yandex.ru/1.x/"
-    resp = await get_response(geocoder_uri, params={
-        "apikey": "40d1649f-0493-4b70-98ba-98533de7710b",
-        "format": "json",
-        "geocode": update.message.text})
 
     dt = []
     LC, UC = None, None
@@ -91,40 +87,64 @@ async def bosses(update, context):
     await update.message.reply_text("К сожалению, в игру пока не добавлены боссы. Следите за обновлениями!\n\
 (Вы будете автоматически возвращены на главную страницу черз 15 секунд)",
                                     reply_markup=end_mup)
+    await ret(update, context)
 
 
 async def mini_bosses(update, context):
     await update.message.reply_text("К сожалению, в игру пока не добавлены элитные враги. Следите за обновлениями!\n\
 (Вы будете автоматически возвращены на главную страницу черз 15 секунд)",
                                     reply_markup=end_mup)
+    await ret(update, context)
 
 
 async def tech_tree(update, context):
     await update.message.reply_text("Древо исследований еще не добавлено в игру\n\
 (Вы будете автоматически возвращены на главную страницу черз 15 секунд)",
                                     reply_markup=end_mup)
+    await ret(update, context)
 
 
 async def classes(update, context):
     await update.message.reply_text("Разработчику было лень переносить статьи по классам, поэтому тут ничего нет.\n\
 (Вы будете автоматически возвращены на главную страницу черз 15 секунд)",
                                     reply_markup=end_mup)
+    await ret(update, context)
 
 
 async def enemies(update, context):
     await update.message.reply_text("Разработчику было лень написать статьи про врагов, поэтому тут ничего нет.\n\
 (Вы будете автоматически возвращены на главную страницу черз 15 секунд)",
                                     reply_markup=end_mup)
+    await ret(update, context)
 
     
 async def change_lg(update, context):
     await update.message.reply_text("Пока здесь доступен только один язык - русский, но вы можете помочь с переводом\
 /support", reply_markup=end_mup)
+    await ret(update, context)
 
 
 async def donate(update, context):
-    await update.message.reply_text("Очень скоро по этой ссылке будет доступна финансовая помощь автору любимой игры",
+    await update.message.reply_text("Очень скоро по этой ссылке будет доступна финансовая помощь автору любимой игры.",
                                     reply_markup=end_mup)
+    await ret(update, context)
+
+
+async def support(update, context):
+    await update.message.reply_text("Очень скоро по этой ссылке можно будет предложить свои идеи.",
+                                    reply_markup=end_mup)
+    await ret(update, context)
+
+
+async def ret(update, context):
+    global timer
+    timer = 15
+    chat_id = update.effective_message.chat_id
+    context.job_queue.run_once(breaker, timer, chat_id=chat_id, name=str(chat_id), data=timer)
+
+
+async def breaker(context):
+    await context.bot.send_message(context.job.chat_id, text="А может и нет...")
 
 
 def main():
